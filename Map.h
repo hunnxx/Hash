@@ -8,11 +8,12 @@ template <class K, class V>
 class Map{
     // template <class K, class V>
     class Entry{
-        int hashcode;
+        int hash;
         K key;
         V value;
     public:
-        Entry(int hashcode, K key, V value);
+        Entry(int hash, K key, V value);
+        int getHash();
         K getKey();
         V getValue();
         V setValue(V newValue);
@@ -24,33 +25,35 @@ class Map{
         // comparingByValue();
     };
     static int MAXIMUM_INITIAL_CAPACITY;
-    static int capacity;
+    static int CAPACTIY;
     int size;
     Map<K,V>::Entry **buckets;
 public:
-    Map(int initCapacity = capacity);
+    Map(int initCapacity = CAPACTIY);
     ~Map();
     int getSize();
+    void resize();
     bool isEmpty();
     Map<K,V>::Entry* searchEntry(K key);
     bool containsKey(K key);
-    // bool containsValue(Object value);
+    bool containsValue(V value);
     V get(K key);
     V put(K key, V value);
+    V putVal(int hash, K key, V value);
     V remove(K key);
     void putAll(Map<K,V> m);
     void clear();
     std::set<K> keySet();
     std::vector<V> values();
-    std::set<Map<K,V>::Entry> entrySet();
+    std::set< std::pair<K,V> > entrySet();
     // bool equals(Object o);
-    static int hash(K key);
+    static int computeHash(K key);
     int hashCode();
     // V getOrDefault(Object key, V defaultValue);
     void forEach(std::function<void(K,V)> action);
     void replaceAll(std::function<V(K,V)> func);
     V putIfAbsent(K key, V value);
-    // bool remove(Object key, Object value);
+    bool remove(K key, V value);
     bool replace(K key, V oldValue, V newValue);
     V replace(K key, V value);
     V computeIfAbsent(K key, std::function<V(K)> mappingFunc);

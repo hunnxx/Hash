@@ -14,6 +14,12 @@ template <class K, class V>
 int Map<K,V>::CAPACTIY = 100;
 
 template <class K, class V>
+int Map<K,V>::PROB = 3;
+
+template <class K, class V>
+float Map<K,V>::OFFSET = 0.6;
+
+template <class K, class V>
 int Map<K,V>::computeHash(K key){
     // Hashing
     return key % CAPACTIY;
@@ -23,17 +29,17 @@ int Map<K,V>::computeHash(K key){
 // Map
 
 template <class K, class V>
-Map<K,V>::Map(int initCapacity){
-    if(initCapacity < 0){
+Map<K,V>::Map(int init_capacity){
+    if(init_capacity < 0){
         // Error IllegalArgumentException
         // throw
     }
-    if(initCapacity > MAXIMUM_INITIAL_CAPACITY){
+    if(init_capacity > MAXIMUM_INITIAL_CAPACITY){
         // Error
         // throw
     }
     size = 0;
-    buckets = new Map<K,V>::Entry*[(CAPACTIY = initCapacity)];
+    buckets = new Map<K,V>::Entry*[(CAPACTIY = init_capacity)];
 }
 
 template <class K, class V>
@@ -49,23 +55,18 @@ int Map<K,V>::getSize(){
 
 template <class K, class V>
 void Map<K,V>::resize(){
-    std::set<K> keyset = keySet();
-    int oldCapacity = CAPACTIY; CAPACTIY *= 2;
-    std::cout << "RESIZE " << CAPACTIY << std::endl;
-    Map<K,V>::Entry **newBuckets = new Map<K,V>::Entry*[CAPACTIY];
+    std::set< std::pair<K,V> > entries = entrySet();
+    int old_capacity = CAPACTIY; CAPACTIY *= 2;
     
-    Map<K,V>::Entry *e; int hash; K key; V value;
-    for(typename std::set<K>::iterator it = keyset.begin(); it != keyset.end(); it++) {
-        e = searchEntry(*it);
-        hash = e->getHash();
-        key = e->getKey();
-        value = e->getValue();
-        newBuckets[hash] = new Map<K,V>::Entry(hash, key, value);
+    int i;
+    for(i = 0; i < old_capacity; i++){
+        delete buckets[i]; buckets[i] = nullptr;
     }
+    delete[] buckets; buckets = nullptr;
+    buckets = new Map<K,V>::Entry*[CAPACTIY];
 
-    for(int i = 0; i < oldCapacity; i++) delete buckets[i];
-    delete[] buckets;
-    buckets = newBuckets;
+    typename std::set< std::pair<K,V> >::iterator it;
+    for (it = entries.begin(); it != entries.end(); it++) put(it->first, it->second);
 }
 
 template <class K, class V>
@@ -74,30 +75,35 @@ bool Map<K,V>::isEmpty(){
 }
 
 template <class K, class V>
-typename Map<K,V>::Entry* Map<K,V>::searchEntry(K key){
-    Map<K,V>::Entry *e; int hash = computeHash(key);
-    do{
-        e = buckets[hash++]; // Linear Probing
-    }while(e == nullptr ? 0 : (key == e->getKey() ? 0 : 1));
-    return e;
+int Map<K,V>::searchEntry(K key){
+    int hash = computeHash(key);
+    while(buckets[hash] == nullptr ? 0 : (key == buckets[hash]->getKey() ? 0 : 1)) hash++ % CAPACTIY;
+    return hash;
 }
 
 template <class K, class V>
 bool Map<K,V>::containsKey(K key){
     // (key==null ? k==null : key.equals(k))
-    Map<K,V>::Entry *e = searchEntry(key);
+    int pos = searchEntry(key);
     // return (key == NULL ? e == nullptr : (e == nullptr ? false : key == e->getKey()));
-    return (key == NULL ? e == nullptr : (e == nullptr ? false : true));
+    return (key == NULL ? buckets[pos] == nullptr : (buckets[pos] == nullptr ? false : true));
 }
 
 template <class K, class V>
-bool Map<K,V>::containsValue(V value){}
+bool Map<K,V>::containsValue(V value){
+    for(int i = 0; i < CAPACTIY; i++){
+        if(buckets[i]){
+            if(buckets[i]->getValue() == value) return true;
+        }
+    }
+    return false;
+}
 
 template <class K, class V>
 V Map<K,V>::get(K key){
     // (key==null ? k==null : key.equals(k))
-    Map<K,V>::Entry *e = searchEntry(key);
-    return (key == NULL ? e == nullptr : (e == nullptr) ? NULL : e->getValue());
+    int pos = searchEntry(key);
+    return (key == NULL ? buckets[pos] == nullptr : (buckets[pos] == nullptr) ? NULL : buckets[pos]->getValue());
 }
 
 template <class K, class V>
@@ -106,48 +112,53 @@ V Map<K,V>::put(K key, V value){
     // ClassCastException
     // NullPointerException
     // IllegalArgumentException
-    return putVal(computeHash(key), key, value);
-}
-
-template <class K, class V>
-V Map<K,V>::putVal(int hash, K key, V value){
-    Map<K,V>::Entry *e;
-    if(buckets[hash] == nullptr){
-        std:: cout << "NEW PUT : " <<  hash << std::endl;
-        e = new Map<K,V>::Entry(hash, key, value);
-        buckets[hash] = e;
-        size++;
-        return NULL;
-    } else {
-        if(containsKey(key)){
-            std::cout << "REPLACE : " << hash << std::endl;
-            if(e = searchEntry(key)){
-                V oldValue = e->getValue();
-                e->setValue(value);
-                return oldValue;
-            }
-            return NULL;
-        } else {
-            // Linear Probing
-            std::cout << "Probing Next: " << hash + 1 << std::endl;
-            return putVal(++hash, key, value);
-        }
+    int cur_pos = computeHash(key);
+    int next_pos = searchEntry(key);
+    if(buckets[next_pos]){
+        std::cout << "REPLACE" << std::endl;
+        V oldValue = buckets[next_pos]->getValue();
+        buckets[next_pos]->setValue(value);
+        return oldValue;
     }
+    if(next_pos - cur_pos > PROB || size > CAPACTIY * OFFSET){
+        std::cout << "RESIZE" << std::endl;
+        resize();
+        cur_pos = computeHash(key);
+        next_pos = searchEntry(key);
+    }
+    std::cout << "NEW PUT : " << next_pos << std::endl;
+    buckets[next_pos] = new Map<K,V>::Entry(cur_pos, key, value);
+    size++;
+    return NULL;
 }
 
 template <class K, class V>
 V Map<K,V>::remove(K key){
     // UnsupportedOperationException
-    return NULL;
+    std::cout << "DELETION" << std::endl;
+    int cur_pos = searchEntry(key);
+    if(buckets[cur_pos] == nullptr) return NULL;
+
+    V oldValue = buckets[cur_pos]->getValue();
+    int hash = buckets[cur_pos]->getHash();
+    delete buckets[cur_pos]; buckets[cur_pos] = nullptr;
+    size--;
+
+    int next_pos = (cur_pos + 1) % CAPACTIY;
+    while(buckets[next_pos]){
+        if(buckets[next_pos]->getHash() != hash) break;
+        std::cout << "START" << std::endl;
+        buckets[next_pos - 1] = new Map<K,V>::Entry(hash, buckets[next_pos]->getKey(), buckets[next_pos]->getValue());
+        delete buckets[next_pos]; buckets[next_pos] = nullptr;
+        next_pos = (next_pos + 1) % CAPACTIY;
+    }
+
+    return oldValue;
 }
 
 template <class K, class V>
-bool Map<K,V>::remove(K key, V Value){
-    // if (containsKey(key) && Objects.equals(map.get(key), value)) {
-    //     map.remove(key);
-    //     return true;
-    // } else
-    //     return false;
+bool Map<K,V>::remove(K key, V value){
+    return false;
 }
 
 template <class K, class V>
@@ -156,13 +167,18 @@ void Map<K,V>::putAll(Map<K,V> m){
     // ClassCastException
     // NullPointerException
     // IllegalArgumentException
+    std::set< std::pair<K,V> > entries = m.entrySet();
+    typename std::set< std::pair<K,V> >::iterator it;
+    for(it = entries.begin(); it != entries.end(); it++) put(it->first, it->second);
 }
 
 template <class K, class V>
 void Map<K,V>::clear(){
     // UnsupportedOperationException
     size = 0;
-    for(int i = 0; i < CAPACTIY; i++) delete buckets[i];
+    for(int i = 0; i < CAPACTIY; i++) {
+        delete buckets[i]; buckets[i] = nullptr;
+    }
 }
 
 template <class K, class V>
@@ -201,19 +217,28 @@ std::set< std::pair<K,V> > Map<K,V>::entrySet(){
 
 template <class K, class V>
 int Map<K,V>::hashCode(){
-    return 0;
+    std::set<K> keys = keySet();
+    typename std::set<K>::iterator it;
+    int pos; int sum = 0;
+    for(it = keys.begin(); it != keys.end(); it++) {
+        pos = searchEntry(*it);
+        sum += buckets[pos]->hashCode();
+    }
+    return sum;
 }
 
 // template <class K, class V>
 // V getOrDefault(Objcet key, V defaultValue){}
 
-template <class K, class V>
-V Map<K,V>::putIfAbsent(K key, V value){}
+// template <class K, class V>
+// V Map<K,V>::putIfAbsent(K key, V value){}
 
 template <class K, class V>
 V Map<K,V>::replace(K key, V value){
     // NullPointerException
     // IllegalArgumentException
+    if(containsKey(key)) return put(key, value);
+    else return NULL;
 }
 
 template <class K, class V>
@@ -221,41 +246,44 @@ bool Map<K,V>::replace(K key, V oldValue, V newValue){
     // ClassCastException
     // NullPointerException
     // IllegalArgumentException
+    int pos = searchEntry(key);
+    if(buckets[pos] ? (buckets[pos]->getValue() == oldValue ? true : false) : false) return put(key, newValue);
+    else return false;
 }
 
-template <class K, class V>
-void Map<K,V>::replaceAll(std::function<V(K,V)> func){
-    // UnsupportedOperationException
-    // ClassCastException
-    // NullPointerException
-    // ConcurrentModificationException
-}
+// template <class K, class V>
+// void Map<K,V>::replaceAll(std::function<V(K,V)> func){
+//     // UnsupportedOperationException
+//     // ClassCastException
+//     // NullPointerException
+//     // ConcurrentModificationException
+// }
 
-template <class K, class V>
-void Map<K,V>::forEach(std::function<void(K,V)> action){
-    // NullPointerException
-    // ConcurrentModificationException
-}
+// template <class K, class V>
+// void Map<K,V>::forEach(std::function<void(K,V)> action){
+//     // NullPointerException
+//     // ConcurrentModificationException
+// }
 
-template <class K, class V>
-V Map<K,V>::computeIfAbsent(K key, std::function<V(K)> mappingFunc){
-    // NullPointerException
-}
+// template <class K, class V>
+// V Map<K,V>::computeIfAbsent(K key, std::function<V(K)> mappingFunc){
+//     // NullPointerException
+// }
 
-template <class K, class V>
-V Map<K,V>::computeIfPresent(K key, std::function<V(K,V)> remappingFunc){
-    // NullPointerException
-}
+// template <class K, class V>
+// V Map<K,V>::computeIfPresent(K key, std::function<V(K,V)> remappingFunc){
+//     // NullPointerException
+// }
 
-template <class K, class V>
-V Map<K,V>::compute(K key, std::function<V(K,V)> remappingFunc){
-    // NullPointerException
-}
+// template <class K, class V>
+// V Map<K,V>::compute(K key, std::function<V(K,V)> remappingFunc){
+//     // NullPointerException
+// }
 
-template <class K, class V>
-V Map<K,V>::merge(K key, V value, std::function<V(K,V)> remappingFunc){
-    // NullPointerException
-}
+// template <class K, class V>
+// V Map<K,V>::merge(K key, V value, std::function<V(K,V)> remappingFunc){
+//     // NullPointerException
+// }
 
 // ---------------------------------------------------------------------------
 // Map::Entry

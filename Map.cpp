@@ -86,7 +86,8 @@ template <class K, class V>
 bool Map<K,V>::containsKey(K key){
     // (key==null ? k==null : key.equals(k))
     Map<K,V>::Entry *e = searchEntry(key);
-    return (key == NULL ? e == NULL : (e == nullptr ? NULL : key == e->getKey()));
+    // return (key == NULL ? e == nullptr : (e == nullptr ? false : key == e->getKey()));
+    return (key == NULL ? e == nullptr : (e == nullptr ? false : true));
 }
 
 template <class K, class V>
@@ -94,20 +95,9 @@ bool Map<K,V>::containsValue(V value){}
 
 template <class K, class V>
 V Map<K,V>::get(K key){
-    // NULL 확인 해야함
     // (key==null ? k==null : key.equals(k))
-
-    // Map<K,V>::Entry *e = searchEntry(key));
-    // return (key == NULL ? e->getKey() == NULL : 
-    // (key == e->getKey() ? e->getValue() : NULL));
-
-    // Map<K,V>::Entry *e;
-    // if(e = searchEntry(key)){
-    //     return (key == NULL ? e->getKey() == NULL : (key == e->getKey() ? e->getValue() : NULL));
-    // } else return NULL;
-
-    Map<K,V>::Entry *e;
-    return (e = searchEntry(key)) ? (key == NULL ? e->getKey() == NULL : (key == e->getKey() ? e->getValue() : NULL)) : NULL;
+    Map<K,V>::Entry *e = searchEntry(key);
+    return (key == NULL ? e == nullptr : (e == nullptr) ? NULL : e->getValue());
 }
 
 template <class K, class V>
@@ -131,10 +121,12 @@ V Map<K,V>::putVal(int hash, K key, V value){
     } else {
         if(containsKey(key)){
             std::cout << "REPLACE : " << hash << std::endl;
-            e = searchEntry(key);
-            V oldValue = e->getValue();
-            e->setValue(value);
-            return oldValue;
+            if(e = searchEntry(key)){
+                V oldValue = e->getValue();
+                e->setValue(value);
+                return oldValue;
+            }
+            return NULL;
         } else {
             // Linear Probing
             std::cout << "Probing Next: " << hash + 1 << std::endl;
@@ -146,8 +138,16 @@ V Map<K,V>::putVal(int hash, K key, V value){
 template <class K, class V>
 V Map<K,V>::remove(K key){
     // UnsupportedOperationException
-    Map<K,V>::Entry *e;
-    int hash = computeHash(key);
+    return NULL;
+}
+
+template <class K, class V>
+bool Map<K,V>::remove(K key, V Value){
+    // if (containsKey(key) && Objects.equals(map.get(key), value)) {
+    //     map.remove(key);
+    //     return true;
+    // } else
+    //     return false;
 }
 
 template <class K, class V>
@@ -208,9 +208,19 @@ int Map<K,V>::hashCode(){
 // V getOrDefault(Objcet key, V defaultValue){}
 
 template <class K, class V>
-void Map<K,V>::forEach(std::function<void(K,V)> action){
+V Map<K,V>::putIfAbsent(K key, V value){}
+
+template <class K, class V>
+V Map<K,V>::replace(K key, V value){
     // NullPointerException
-    // ConcurrentModificationException
+    // IllegalArgumentException
+}
+
+template <class K, class V>
+bool Map<K,V>::replace(K key, V oldValue, V newValue){
+    // ClassCastException
+    // NullPointerException
+    // IllegalArgumentException
 }
 
 template <class K, class V>
@@ -222,28 +232,9 @@ void Map<K,V>::replaceAll(std::function<V(K,V)> func){
 }
 
 template <class K, class V>
-V Map<K,V>::putIfAbsent(K key, V value){}
-
-template <class K, class V>
-bool Map<K,V>::remove(K key, V Value){
-    // if (containsKey(key) && Objects.equals(map.get(key), value)) {
-    //     map.remove(key);
-    //     return true;
-    // } else
-    //     return false;
-}
-
-template <class K, class V>
-bool Map<K,V>::replace(K key, V oldValue, V newValue){
-    // ClassCastException
+void Map<K,V>::forEach(std::function<void(K,V)> action){
     // NullPointerException
-    // IllegalArgumentException
-}
-
-template <class K, class V>
-V Map<K,V>::replace(K key, V value){
-    // NullPointerException
-    // IllegalArgumentException
+    // ConcurrentModificationException
 }
 
 template <class K, class V>

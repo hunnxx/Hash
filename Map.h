@@ -41,6 +41,7 @@ public:
     V put(K key, V value);
     V putVal(int hash, K key, V value);
     V remove(K key);
+    bool remove(K key, V value);
     void putAll(Map<K,V> m);
     void clear();
     std::set<K> keySet();
@@ -50,12 +51,11 @@ public:
     static int computeHash(K key);
     int hashCode();
     // V getOrDefault(Object key, V defaultValue);
-    void forEach(std::function<void(K,V)> action);
-    void replaceAll(std::function<V(K,V)> func);
     V putIfAbsent(K key, V value);
-    bool remove(K key, V value);
     bool replace(K key, V oldValue, V newValue);
     V replace(K key, V value);
+    void replaceAll(std::function<V(K,V)> func);
+    void forEach(std::function<void(K,V)> action);
     V computeIfAbsent(K key, std::function<V(K)> mappingFunc);
     V computeIfPresent(K key, std::function<V(K,V)> remappingFunc);
     V compute(K key, std::function<V(K,V)> remappingFunc);

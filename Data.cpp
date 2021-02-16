@@ -8,6 +8,7 @@ Data::Data(){
     this->input_cnt = 0;
     this->replace_cnt = 0;
     this->resize_cnt = 0;
+    this->prob_cnt = 0;
 }
 
 int Data::getInputCnt(){
@@ -22,6 +23,10 @@ int Data::getResizeCnt(){
     return resize_cnt;
 }
 
+int Data::getProbCnt(){
+    return prob_cnt;
+}
+
 void Data::increaseInputCnt(){
     input_cnt++;
 }
@@ -34,13 +39,17 @@ void Data::increaseResizeCnt(){
     resize_cnt++;
 }
 
+void Data::increaseProbCnt(){
+    prob_cnt++;
+}
+
 void Data::reset(){
-    input_cnt = replace_cnt = 0;
+    input_cnt = replace_cnt = prob_cnt = 0;
 }
 
 void Data::print(int size, int capacity){
     int num = 21;
-    cout.width(110); cout.fill('='); cout << "" << endl;
+    cout.width(132); cout.fill('='); cout << "" << endl;
 
     // SIZE // CAPACITY // input // replace // resize
     cout.width(num); cout.fill(' '); cout.flags(ios::left);
@@ -52,15 +61,18 @@ void Data::print(int size, int capacity){
     cout.width(num); cout.fill(' '); cout.flags(ios::left);
     cout << "REPLACE" << "|";
     cout.width(num); cout.fill(' '); cout.flags(ios::left);
-    cout << "RESIZE" << "|\n\r";
+    cout << "RESIZE" << "|";
+    cout.width(num); cout.fill(' '); cout.flags(ios::left);
+    cout << "PROB" << "|\n\r";
 
-    cout.width(110); cout.fill('='); cout << "" << endl;
+    cout.width(132); cout.fill('='); cout << "" << endl;
 
     cout.width(num); cout.fill(' '); cout << size << "|";
     cout.width(num); cout.fill(' '); cout << capacity << "|";
     cout.width(num); cout.fill(' '); cout << input_cnt << "|";
     cout.width(num); cout.fill(' '); cout << replace_cnt << "|";
-    cout.width(num); cout.fill(' '); cout << resize_cnt << "|\n\r";
+    cout.width(num); cout.fill(' '); cout << resize_cnt << "|";
+    cout.width(num); cout.fill(' '); cout << prob_cnt << "|\n\r";
 
-    cout.width(110); cout.fill('='); cout << "" << endl;
+    cout.width(132); cout.fill('='); cout << "" << endl;
 }

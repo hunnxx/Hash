@@ -25,10 +25,13 @@ float Map<K,V>::OFFSET = 0.5;
 template <class K, class V>
 unsigned int Map<K,V>::computeHash(K key){
     // Multiplicative Hashing
-    unsigned long long a = 2147483647;
-    int w = 48; int m = 32;
-    key ^= key >> (w-m);
-    return ((a*key) >> (w-m)) % CAPACTIY;
+    // unsigned long long a = 2147483647;
+    // int w = 48; int m = 32;
+    // key ^= key >> (w-m);
+    // return ((a*key) >> (w-m)) % CAPACTIY;
+
+    // Mod
+    return key % CAPACTIY;
 }
 
 // ---------------------------------------------------------------------------
@@ -86,17 +89,21 @@ bool Map<K,V>::isEmpty(){
 
 template <class K, class V>
 int Map<K,V>::searchEntry(K key){
-    int hash = computeHash(key);
+    int hash = computeHash(key); int prev = hash;
     while(buckets[hash] == nullptr ? 0 : (key == buckets[hash]->getKey() ? 0 : 1)) hash = ++hash % CAPACTIY;
+    if(abs(prev - hash)) data.increaseProbCnt();
     return hash;
 }
 
 template <class K, class V>
 bool Map<K,V>::containsKey(K key){
-    // (key==null ? k==null : key.equals(k))
-    int pos = searchEntry(key);
-    // return (key == NULL ? e == nullptr : (e == nullptr ? false : key == e->getKey()));
-    return (key == NULL ? buckets[pos] == nullptr : (buckets[pos] == nullptr ? false : true));
+    // // (key==null ? k==null : key.equals(k))
+
+    // int pos = searchEntry(key);
+
+    // // return (key == NULL ? e == nullptr : (e == nullptr ? false : key == e->getKey()));
+    // // return (key == NULL ? buckets[pos] == nullptr : (buckets[pos] == nullptr ? false : true));
+    return buckets[searchEntry(key)] ? true : false;
 }
 
 template <class K, class V>
@@ -113,7 +120,8 @@ template <class K, class V>
 V Map<K,V>::get(K key){
     // (key==null ? k==null : key.equals(k))
     int pos = searchEntry(key);
-    return (key == NULL ? buckets[pos] == nullptr : (buckets[pos] == nullptr) ? NULL : buckets[pos]->getValue());
+    // return (key == NULL ? buckets[pos] == nullptr : (buckets[pos] == nullptr) ? NULL : buckets[pos]->getValue());
+    return buckets[pos] == nullptr ? NULL : buckets[pos]->getValue();
 }
 
 template <class K, class V>
@@ -123,7 +131,8 @@ V Map<K,V>::put(K key, V value){
     // NullPointerException
     // IllegalArgumentException
     int cur_pos = computeHash(key);
-    if(!cur_pos) return NULL;
+    // if(!cur_pos) return NULL;
+    cout << "PUT START" << endl;
     int next_pos = searchEntry(key);
 
     if(buckets[next_pos]){
@@ -133,7 +142,7 @@ V Map<K,V>::put(K key, V value){
         buckets[next_pos]->setValue(value);
         return oldValue;
     }
-    if(next_pos - cur_pos > PROB || size > CAPACTIY * OFFSET){ // |a|
+    if(abs(next_pos - cur_pos) > PROB || size > CAPACTIY * OFFSET){
         cout << "RESIZE" << endl;
         resize();
         cur_pos = computeHash(key);
@@ -165,7 +174,7 @@ V Map<K,V>::remove(K key){
         buckets[next_pos - 1] = new Map<K,V>::Entry(next_pos - 1, buckets[next_pos]->getKey(), buckets[next_pos]->getValue());
         delete buckets[next_pos]; buckets[next_pos] = nullptr;
         next_pos = ++next_pos % CAPACTIY;
-    }
+    }    
 
     return oldValue;
 }
@@ -281,7 +290,7 @@ void Map<K,V>::printBuckets(){
             cout.flags(ios::right); cout << endl; printLine(width);
             cout.fill(' ');
             for(it = vec.begin(); it != vec.end(); it++){
-                if(it->first == 0) {
+                if(it->second == 0) {// if(it->first == 0) {
                     cout << "NULL "; cout << "NULL |";
                 }
                 else {

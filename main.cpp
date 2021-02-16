@@ -32,7 +32,28 @@ int main(){
     //     map.put(key, val);
     // }
 
-    map.put(10, 1);
+    // 0. null에 대한 처리 수정
+    // 1. 0이 들어오는 상황
+    // 2. 충돌 및 중간에 값 존재할 때, remove 처리
+    // 1 2 2 상황
+    // 1 3 2 2 상황
+    // 1 - 2 2 상황
+    // 2 3 2 2 4 상황
+    // 2 1 상황
+
+    cout << "INPUT" << endl;
+    cout << map.put(2, 1) << endl; // 2
+    cout << map.put(3, 2) << endl; // 3
+    cout << map.put(19, 3) << endl; // 2 -> 4
+    cout << map.put(36, 4) << endl; // 2 -> 5
+    cout << map.put(0, 5) << endl; // 0
+    cout << map.put(6, 6) << endl; // 6
+
+    cout << "REMOVE" << endl;
+    // cout << map.remove(2) << endl;
+
+    cout << "GET" << endl;
+    cout << map.get(0) << endl;
 
     map.printBuckets();
     map.data.print(map.getSize(), map.getCapacity());

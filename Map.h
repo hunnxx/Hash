@@ -13,11 +13,14 @@ class Map{
         int hash;
         K key;
         V value;
+        int next;
     public:
         Entry(int hash, K key, V value);
         K getKey();
         V getValue();
+        int getNext();
         V setValue(V newValue);
+        void setNext(int next);
         bool equals(Map<K,V>::Entry e);
         int hashCode();
         // comparingByKey();
@@ -44,6 +47,7 @@ public:
     void resize();
     bool isEmpty();
     int searchEntry(K key);
+    int probing(K key);
     bool containsKey(K key);
     bool containsValue(V value);
     V get(K key);

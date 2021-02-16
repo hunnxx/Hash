@@ -2,61 +2,108 @@
 
 #include <iostream>
 #include <set>
-#include <string>
 #include <random>
+#include <vector>
 
 using namespace std;
 
-unsigned int hash(int key){
-    unsigned long long a = 2147483647;
-    int w = 48;
-    int m = 32;
-    key ^= key >> (w-m);
-    return (a*key) >> (w-m);
-}
-
-int main(){
-    // // To use a non-deterministic seed
-    // random_device random_dev;
-    // static mt19937 gen(random_dev());
-    // // static mt19937 gen(3267);
-    // uniform_int_distribution<> distr(0, 9999);
+void autoProcessing(){
+    // To use a non-deterministic seed
+    random_device random_dev;
+    static mt19937 gen(random_dev());
+    uniform_int_distribution<> distr(0, 9999);
 
     Map<int, int> map;
 
-    // for (int i = 0; i < 10; i++)
-    // {
-    //     int key = distr(gen);
-    //     int val = distr(gen);
-    //     cout << key << " : " << val << endl;
-    //     map.put(key, val);
-    // }
+    vector< pair<int,int> > vec_input;
+    vector< pair<int,int> >::iterator v_it;
 
-    // 0. null에 대한 처리 수정
-    // 1. 0이 들어오는 상황
-    // 2. 충돌 및 중간에 값 존재할 때, remove 처리
-    // 1 2 2 상황
-    // 1 3 2 2 상황
-    // 1 - 2 2 상황
-    // 2 3 2 2 4 상황
-    // 2 1 상황
+    // PUT
+    for (int i = 0; i < 20; i++)
+    {
+        int key = distr(gen);
+        int val = distr(gen);
+        vec_input.push_back(make_pair(key,val));
+        map.put(key, val);
+    }
 
-    cout << "INPUT" << endl;
-    cout << map.put(2, 1) << endl; // 2
-    cout << map.put(3, 2) << endl; // 3
-    cout << map.put(19, 3) << endl; // 2 -> 4
-    cout << map.put(36, 4) << endl; // 2 -> 5
-    cout << map.put(0, 5) << endl; // 0
-    cout << map.put(6, 6) << endl; // 6
-
-    cout << "REMOVE" << endl;
-    // cout << map.remove(2) << endl;
-
-    cout << "GET" << endl;
-    cout << map.get(0) << endl;
-
-    map.printBuckets();
+    // GET
+    cout << "\n\r\n\rPUT : ";
+    for(v_it = vec_input.begin(); v_it != vec_input.end(); v_it++){
+        cout << "{" << v_it->first << ":" << v_it->second << "}";
+    }
+    cout<< "\n\rGET : ";
+    for(v_it = vec_input.begin(); v_it != vec_input.end(); v_it++){
+        cout << "{" << v_it->first << ":" << map.get(v_it->first) << "}";
+    }
+    cout<<endl;
     map.data.print(map.getSize(), map.getCapacity());
+    map.printBuckets();
+    
+}
 
+void Processing(){
+    static mt19937 gen(3267);
+    uniform_int_distribution<> distr(0, 9999);
+
+    Map<int, int> map;
+
+    vector< pair<int,int> > vec_input;
+    vector< pair<int,int> >::iterator v_it;
+
+    // PUT
+    for (int i = 0; i < 20; i++)
+    {
+        int key = distr(gen);
+        int val = distr(gen);
+        vec_input.push_back(make_pair(key,val));
+        map.put(key, val);
+    }
+
+    // GET
+    cout << "\n\r\n\rPUT : ";
+    for(v_it = vec_input.begin(); v_it != vec_input.end(); v_it++){
+        cout << "{" << v_it->first << ":" << v_it->second << "}";
+    }
+    cout<< "\n\rGET : ";
+    for(v_it = vec_input.begin(); v_it != vec_input.end(); v_it++){
+        cout << "{" << v_it->first << ":" << map.get(v_it->first) << "}";
+    }
+    cout<<endl;
+    map.data.print(map.getSize(), map.getCapacity());
+    map.printBuckets();
+
+    // REPLACE
+    cout << "\n\r\n\rREPLACE" << endl;
+    int cnt = 0;
+    for(v_it = vec_input.begin(); v_it != vec_input.end(); v_it++){
+        map.replace(v_it->first, cnt++);
+    }
+    map.printBuckets();
+
+    // REMOVE
+    cout << "\n\r\n\rREMOVE1 : 1762 return "; cout << map.remove(1762) << endl;
+    map.printBuckets();
+    cout << "\n\r\n\rREMOVE2 : 9070 return "; cout << map.remove(9070) << endl;
+    map.printBuckets();
+}
+
+int main(){
+    int n;
+    while(n > 0){
+        cout << "\n\r\n\r\n\rSELECT T(0) AP(1) P(2) : ";
+        cin >> n;
+        switch (n)
+        {
+        case 1:
+            autoProcessing(); // 자동
+            break;
+        case 2:
+            Processing(); // 수동
+            break;
+        default:
+            break;
+        }
+    }   
     return 0;
 }

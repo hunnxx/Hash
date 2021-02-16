@@ -1,29 +1,41 @@
-#include <iostream>
 #include "Map.h"
-#include <set>
 
-class A{
-    int key = 10;
-public:
-    int getKey(){ return key; }
-};
+#include <iostream>
+#include <set>
+#include <string>
+#include <random>
+
+using namespace std;
+
+unsigned int hash(int key){
+    unsigned long long a = 2147483647;
+    int w = 48;
+    int m = 32;
+    key ^= key >> (w-m);
+    return (a*key) >> (w-m);
+}
 
 int main(){
-    Map<int,int> test;
-    std::cout << "PUT" << std::endl;
-    std::cout << test.put(10, 1) << std::endl;
-    std::cout << test.put(110, 2) << std::endl; 
-    std::cout << test.put(210, 3) << std::endl; 
-    std::cout << test.put(110, 4) << std::endl; 
-    std::cout << test.put(310, 5) << std::endl; 
-    std::cout << test.put(410, 6) << std::endl; 
+    // // To use a non-deterministic seed
+    // random_device random_dev;
+    // static mt19937 gen(random_dev());
+    // // static mt19937 gen(3267);
+    // uniform_int_distribution<> distr(0, 9999);
 
-    std::cout << "GET" << std::endl;
-    std::cout << test.get(10) << std::endl;
-    std::cout << test.get(110) << std::endl;
-    std::cout << test.get(210) << std::endl;
-    std::cout << test.get(310) << std::endl;
-    std::cout << test.get(410) << std::endl;
+    Map<int, int> map;
+
+    // for (int i = 0; i < 10; i++)
+    // {
+    //     int key = distr(gen);
+    //     int val = distr(gen);
+    //     cout << key << " : " << val << endl;
+    //     map.put(key, val);
+    // }
+
+    map.put(10, 1);
+
+    map.printBuckets();
+    map.data.print(map.getSize(), map.getCapacity());
 
     return 0;
 }

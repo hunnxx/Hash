@@ -1,18 +1,20 @@
-#ifndef MAP_HPP
-#define MAP_HPP
+#ifndef MAP_H
+#define MAP_H
+
+#include "Data.h"
 
 #include <set>
 #include <vector>
 
 template <class K, class V>
 class Map{
+
     class Entry{
         int hash;
         K key;
         V value;
     public:
         Entry(int hash, K key, V value);
-        int getHash();
         K getKey();
         V getValue();
         V setValue(V newValue);
@@ -23,16 +25,22 @@ class Map{
         // comparingByKey();
         // comparingByValue();
     };
+
     static int MAXIMUM_INITIAL_CAPACITY;
     static int CAPACTIY;
     static int PROB;
     static float OFFSET;
+
     int size;
     Map<K,V>::Entry **buckets;
+
 public:
+
     Map(int init_capacity = CAPACTIY);
     ~Map();
+    
     int getSize();
+    int getCapacity();
     void resize();
     bool isEmpty();
     int searchEntry(K key);
@@ -48,7 +56,7 @@ public:
     std::vector<V> values();
     std::set< std::pair<K,V> > entrySet();
     // bool equals(Object o);
-    static int computeHash(K key);
+    static unsigned int computeHash(K key);
     int hashCode();
     // V getOrDefault(Object key, V defaultValue);
     // V putIfAbsent(K key, V value);
@@ -60,5 +68,11 @@ public:
     // V computeIfPresent(K key, std::function<V(K,V)> remappingFunc);
     // V compute(K key, std::function<V(K,V)> remappingFunc);
     // V merge(K key, V value, std::function<V(K,V)> remappingFunc);
+
+    Data data;
+
+    void printBuckets();
+    void printLine(int width);
+
 };
-#endif // ifndef MAP_HPP
+#endif // ifndef MAP_H

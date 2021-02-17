@@ -16,7 +16,7 @@ int Map<K,V>::MAXIMUM_INITIAL_CAPACITY = INT_MAX; // 2147483647
 
 // Bucket의 크기
 template <class K, class V>
-int Map<K,V>::CAPACTIY = 17;
+int Map<K,V>::CAPACTIY = 17; // 최대한 Prime Number가 좋음
 
 // Bucket의 크기를 조정하기 위한 수치값(Probing)
 template <class K, class V>
